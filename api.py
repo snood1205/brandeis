@@ -1,5 +1,5 @@
 # -*- coding: utf-8  -*-
-#! python3
+# ! python3
 # Brandeis - A tool to convert plaintext court cases (from the lochner
 # tool: http://gitorious.org/lochner/) to wikitext.
 # 
@@ -21,33 +21,37 @@
 from urllib import error, parse, request
 from sys import exit
 from bexceptions import NoCaseInList, PageNotFound, MultipleCases
-import json, re, os
+import json
+import re
+import os
+
 
 class API(object):
-    '''Makes any calls to the Wikisource API to retrieve necessary information.'''    
-    
+    """Makes any calls to the Wikisource API to retrieve necessary information."""
+
     def __init__(self):
         self.base_URL = 'http://en.wikisource.org/w/api.php?format=json&action='
-        self.base_volume = 'United States Reports/Volume ' 
+        self.base_volume = 'United States Reports/Volume '
         self.cache = Cache()
-        
+
     def case_exists(self, line):
-        '''Use the Wikisource API to parse the case line and determine if the case already exists
-        on Wikisource.'''
-        
+        """Use the Wikisource API to parse the case line and determine if the case already exists
+        on Wikisource."""
+
+        title = None
         # Avoid determining if category exists; this will return a false positive.
         title_match = re.search(r'\[{2}(?!:?Category)(?P<link>.*?)\]{2}', line)
         if title_match:
             title = title_match.group("link")
-            
-        URL = self.base_URL + 'parse&text={0}&prop=links'.format(parse.quote(line))
-        response = self.request(URL)
+
+        url = self.base_URL + 'parse&text={0}&prop=links'.format(parse.quote(line))
+        response = self.request(url)
         for link in response["parse"]["links"]:
             if link['*'] == title:
                 return "exists" in link
-        
+
     def get_case_line(self, title, vol, page):
-        '''Find the case in the appropriate U.S. Reports list. Follows the following logic:
+        """Find the case in the appropriate U.S. Reports list. Follows the following logic:
             - If it finds a line matching "[volume] U.S. [page]" in list (e.g. "1 U.S. 100")
                 - Return line if only one is found
                 - filter_multiple() if multiple matches are found
@@ -55,20 +59,20 @@ class API(object):
                 - Return line if only one is found
                 - Raise MultipleCases if multiple matches are found
            If neither of these returns a result, raise NoCaseInList
-        '''
-        
+        """
+
         # Get the appropriate United States Reports/Volume page
         volume = parse.quote(self.base_volume + vol);
-        URL = self.base_URL + 'query&titles={0}&prop=revisions&rvprop=content'.format(volume)
+        url = self.base_URL + 'query&titles={0}&prop=revisions&rvprop=content'.format(volume)
         content = self.cache.get_cached_volume(vol)
         if not content:
-            response = self.request(URL)
+            response = self.request(url)
             rev_id = list(response["query"]["pages"].keys())[0]
             if rev_id == "-1":
                 raise PageNotFound("There is no Wikisource page at {}.".format(volume))
             content = response["query"]["pages"][rev_id]["revisions"][0]["*"]
             self.cache.add_to_volume_cache(vol, content)
-        
+
         # Search this page for "[volume] U.S. [page]"
         rstring = "^.*?\D{0}\sU\.S\.\s{1}\D.*?$".format(vol, page)
         regex = re.compile(rstring, re.MULTILINE)
@@ -82,7 +86,7 @@ class API(object):
                     return result
                 else:
                     raise MultipleCases("Unable to resolve multiple matches for {0} ({1} U.S."
-                                        " {2}) in API query: {3}".format(title, vol, page, URL))
+                                        " {2}) in API query: {3}".format(title, vol, page, url))
         # Search this page for the exact title (case-insensitive)
         else:
             regex = re.compile(re.escape(title), re.MULTILINE | re.IGNORECASE)
@@ -93,14 +97,15 @@ class API(object):
                 else:
                     # VERY unlikely to happen, but no harm in adding it
                     raise MultipleCases("Unable to resolve multiple NAME matches for {0} ({1} U.S."
-                                            " {2}) in API query: {2}".format(title, vol, page, URL))
+                                        " {2}) in API query: {2}".format(title, vol, page, url))
             # Neither method worked; time to give up.
             else:
                 raise NoCaseInList("Unable to find case {0} ({1} U.S. {2}) in the list of cases"
-                                   " retrieved from API query: {3}.".format(title, vol, page, URL))
-                
-    def filter_multiple(self, title, match_list):
-        '''Fuzzy-matches the case name in a list of possible matches. Occasionally the volume page
+                                   " retrieved from API query: {3}.".format(title, vol, page, url))
+
+    @staticmethod
+    def filter_multiple(title, match_list):
+        """Fuzzy-matches the case name in a list of possible matches. Occasionally the volume page
         will have multiple cases with the same volume and page numbers; this will try to match by
         title. Titles may not be exact, so this requires one word in the petitioner and one in the
         respondent matches. Common words ("the", "et", "al", etc.) will not be matched.
@@ -108,7 +113,7 @@ class API(object):
         This does NOT correct for spelling mistakes. This does NOT try to differentiate between two
         cases that have matching words in the petitioner and title (for example, it will not return
         a result for "Respublica v. Sweers" when the match list includes "Respublica v. Sweers" and
-        "Respublica v. Cornelius Sweers".'''
+        "Respublica v. Cornelius Sweers"."""
         try:
             petitioner, respondent = title.split('v.')
             petitioner = set([item.strip().lower() for item in petitioner.split()])
@@ -129,34 +134,41 @@ class API(object):
                 return actual_matches[0]
             else:
                 return None
-    
-    def request(self, url):
-        '''Generic API request function. Requires that the response format be JSON.'''
+
+    @staticmethod
+    def request(url):
+        """Generic API request function. Requires that the response format be JSON."""
         try:
             response = json.loads(request.urlopen(url).read().decode('utf-8'))
         except error.HTTPError:
             exit("Exited: HTTPError when making API requests.")
         else:
             return response
-        
+
+
 class Cache(object):
-    
+    """
+    This class represents a cache
+    """
+
     def __init__(self):
         try:
             os.mkdir('cache')
         except (OSError, IOError):
             pass
 
-    def get_cached_volume(self, volume):
+    @staticmethod
+    def get_cached_volume(volume):
         '''Retrieve an already-cached volume, or None if it does not exist.'''
         try:
             with open('cache/' + volume, 'r', encoding='utf-8') as cache_file:
                 content = cache_file.read()
                 return content
         except (OSError, IOError):
-            return None            
-    
-    def add_to_volume_cache(self, volume, content):
+            return None
+
+    @staticmethod
+    def add_to_volume_cache(volume, content):
         '''Add a volume to the cache.'''
         with open('cache/' + volume, 'w', encoding='utf-8') as cache_file:
             cache_file.write(content)
