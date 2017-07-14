@@ -62,7 +62,7 @@ class API(object):
         """
 
         # Get the appropriate United States Reports/Volume page
-        volume = parse.quote(self.base_volume + vol);
+        volume = parse.quote(self.base_volume + vol)
         url = self.base_URL + 'query&titles={0}&prop=revisions&rvprop=content'.format(volume)
         content = self.cache.get_cached_volume(vol)
         if not content:
@@ -159,9 +159,9 @@ class Cache(object):
 
     @staticmethod
     def get_cached_volume(volume):
-        '''Retrieve an already-cached volume, or None if it does not exist.'''
+        """Retrieve an already-cached volume, or None if it does not exist."""
         try:
-            with open('cache/' + volume, 'r', encoding='utf-8') as cache_file:
+            with open('cache/' + volume, encoding='utf-8') as cache_file:
                 content = cache_file.read()
                 return content
         except (OSError, IOError):
@@ -169,7 +169,7 @@ class Cache(object):
 
     @staticmethod
     def add_to_volume_cache(volume, content):
-        '''Add a volume to the cache.'''
+        """Add a volume to the cache."""
         with open('cache/' + volume, 'w', encoding='utf-8') as cache_file:
             cache_file.write(content)
         return True

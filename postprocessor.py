@@ -1,5 +1,5 @@
 # -*- coding: utf-8  -*-
-#! python3
+# ! python3
 # Brandeis - A tool to convert plaintext court cases (from the lochner
 # tool: http://gitorious.org/lochner/) to wikitext.
 # 
@@ -20,21 +20,26 @@
 
 import re
 
+
 class Postprocessor(object):
+    """
+
+    """
+
     def __init__(self, file):
         self.filename = file
-        
+
     def process(self):
-        '''Dispatcher method.'''
+        """Dispatcher method."""
         self.clean_spaces()
         self.multiline_bold()
-#         self.multiline_italic()
+        #         self.multiline_italic()
         self.fix_apostrophes()
-        self.clean_spaces() #Once more for good measure.
-    
+        self.clean_spaces()  # Once more for good measure.
+
     def clean_spaces(self):
-        '''Make sure any line break consists of two spaces, avoid lines with just spaces on them.'''
-        with open(self.filename, 'r', encoding='utf-8') as output:
+        """Make sure any line break consists of two spaces, avoid lines with just spaces on them."""
+        with open(self.filename, encoding='utf-8') as output:
             content = output.read()
         content = content.strip(' \t\n\r\f\v')
         content = re.sub(r'\n\s*\|\s*\n', '\n\n', content)
@@ -44,40 +49,40 @@ class Postprocessor(object):
         content = re.sub('(?<!\n)\n(?!\n)', '\n\n', content)
         with open(self.filename, 'w', encoding='utf-8') as output:
             output.write(content)
-            
+
     def fix_apostrophes(self):
-        '''Change any literal apostrophes (that were temporarily converted to '¤' characters) back
-        to apostrophes.'''
-        with open(self.filename, 'r', encoding='utf-8') as output:
+        """Change any literal apostrophes (that were temporarily converted to '¤' characters) back
+        to apostrophes."""
+        with open(self.filename, encoding='utf-8') as output:
             content = output.read()
         content = content.replace('¤', "'")
         with open(self.filename, 'w', encoding='utf-8') as output:
             output.write(content)
-            
+
     def multiline_bold(self):
-        '''Deal with line breaks within bold text.'''
-        with open(self.filename, 'r', encoding='utf-8') as output:
+        """Deal with line breaks within bold text."""
+        with open(self.filename, encoding='utf-8') as output:
             content = output.read()
-        content = re.split(r"(?<!<nowiki>)'''((?:.|\n)*?)'''(?!<\/nowiki>)", content)
+        content = re.split(r"(?<!<nowiki>)'''((?:.|\n)*?)'''(?!</nowiki>)", content)
         new = ''
         for i in range(len(content)):
             if content[i]:
-                if ( i%2 ):
+                if i % 2:
                     new += "'''" + content[i] + "'''"
                 else:
                     new += content[i]
         with open(self.filename, 'w', encoding='utf-8') as output:
             output.write(new)
-            
+
     def multiline_italic(self):
-        '''Deal with line breaks within italic text.'''
-        with open(self.filename, 'r', encoding='utf-8') as output:
+        """Deal with line breaks within italic text."""
+        with open(self.filename, encoding='utf-8') as output:
             content = output.read()
         content = re.split(r"((?<!('|>))''[^'](?:.|\n)*?[^']''(?!('|<)))", content)
         new = ''
         for i in range(len(content)):
             if content[i]:
-                if ( i%2 ):
+                if i % 2:
                     new += "''" + content[i] + "''"
                 else:
                     new += content[i]

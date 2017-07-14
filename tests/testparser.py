@@ -21,42 +21,45 @@ from caseparser import Parser
 from bexceptions import *
 import unittest
 
+
 class TestParser(unittest.TestCase):
-    '''Test tokenizer module.'''
-    
+    """Test tokenizer module."""
+
     def setUp(self):
         self.test_dict = {'respondent': 'Person 2',
-                           'abbr': 'U.S.',
-                           'petitioner': 'Person 1',
-                           'volume': '111',
-                           'number': '1 U.S. 111',
-                           'page': '111',
-                           'title': 'Person One v. Person Two',
-                           'date': '2000',
-                           'full_title': 'Person One v. Person Two - 1 U.S. 111 (2000)'}
+                          'abbr': 'U.S.',
+                          'petitioner': 'Person 1',
+                          'volume': '111',
+                          'number': '1 U.S. 111',
+                          'page': '111',
+                          'title': 'Person One v. Person Two',
+                          'date': '2000',
+                          'full_title': 'Person One v. Person Two - 1 U.S. 111 (2000)'}
         self.parser = Parser(self.test_dict)
-        
+
     def testGoodLink(self):
         token = ('href="/cases/federal/us/531/98/"', 'Syllabus')
         self.assertEqual(self.parser.link(token), 'Syllabus',
                          'Parser failed to extract text from a good link.')
-    
+
     def testBadLink(self):
         token = ('href="http://addthis.com/"', 'Spam')
         self.assertEqual(self.parser.link(token), '',
-                          'Parser did not return empty string for a bad link.')
-            
+                         'Parser did not return empty string for a bad link.')
+
     def testGoodEntity(self):
         content = 'quot'
         self.assertEqual(self.parser.html_entity(content), '"', 'HTML entity gave incorrect value.')
-        
+
     def testBadEntity(self):
         content = 'foo'
         self.assertRaises(EntityError, self.parser.html_entity, content)
-        
+
     def testSmallCaps(self):
         content = "FOO"
         self.assertEqual(self.parser.smallcaps(content), "{{sc|Foo}}",
                          "Incorrect value returned from small caps parser.")
+
+
 if __name__ == '__main__':
     unittest.main()

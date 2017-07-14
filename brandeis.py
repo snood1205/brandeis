@@ -1,5 +1,5 @@
 # -*- coding: utf-8  -*-
-#! python3
+# ! python3
 # Brandeis - A tool to convert plaintext court cases (from the lochner
 # tool: http://gitorious.org/lochner/) to wikitext.
 # 
@@ -18,15 +18,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, logging, os, re, sys
+import argparse
+import logging
+import os
+import re
+import sys
 from time import strftime, gmtime
-from bexceptions import *
-from validator import Validator
-from caseparser import Parser, get_metadata, strip_extraneous
+
 from api import API
-from tokenizer import Tokenizer
-from postprocessor import Postprocessor
+from bexceptions import *
 from bot.core import Bot
+from caseparser import Parser, get_metadata, strip_extraneous
+from postprocessor import Postprocessor
+from tokenizer import Tokenizer
+from validator import Validator
 
 # Set up logging
 try:
@@ -51,7 +56,7 @@ summary_logger.info('==Bot run: ' + strftime("%d-%m-%Y, %H:%M:%S (UTC)", gmtime(
 
 # Command line parser
 parser = argparse.ArgumentParser(description='Convert the text file of a supreme court case '
-                                 'to wikitext.')
+                                             'to wikitext.')
 input_files = parser.add_mutually_exclusive_group(required=True)
 input_files.add_argument('-f', '--files', nargs='*', help='List of files to be parsed.')
 input_files.add_argument('-d', '--dir', nargs=1, help='Directory of files to be parsed.')
@@ -82,16 +87,16 @@ for file in files:
     metadict = dict()
     validator = Validator(file)
     api = API()
-    
+
     # Remove extra HTML
-    with open(file, 'r', encoding='utf-8') as html:
+    with open(file, encoding='utf-8') as html:
         raw = html.read()
         content = strip_extraneous(raw)
-        
+
     if content:
         with open(file, 'w', encoding='utf-8') as html:
             html.write(content)
-    
+
     # Validate the file. Files that do not pass validation are skipped without interrupting the rest
     # of the process.
     try:
@@ -102,10 +107,10 @@ for file in files:
     except ValidatorError as e:
         logger.error(e.value + " File will be skipped.")
         continue
-    
+
     # Get the title and other metadata
     get_metadata(metadict, file)
-    
+
     # Skip if the file exists on Wikisource already
     try:
         line = api.get_case_line(metadict['title'], metadict['volume'], metadict['page'])
@@ -125,13 +130,13 @@ for file in files:
             continue
     else:
         if api.case_exists(line):
-#             choice = input(metadict['title'] + ' exists on Wikisource. Continue? (y/n)')
-#             if choice == 'n' or choice == "N":
+            #             choice = input(metadict['title'] + ' exists on Wikisource. Continue? (y/n)')
+            #             if choice == 'n' or choice == "N":
             logger.info(metadict['title'] + " exists on Wikisource. Skipping.")
             continue
-#             else:
-#                 logger.info(metadict['title'] + " exists on Wikisource. Continuing.")
-    
+            #             else:
+            #                 logger.info(metadict['title'] + " exists on Wikisource. Continuing.")
+
     # At this point, we have a valid text file for a case that does not exist on Wikisource
     logger.info("Parsing {0}.".format(metadict['title']))
     tokenizer = Tokenizer(metadict)
@@ -142,19 +147,19 @@ for file in files:
         pass
     out_filename = 'wikitext/' + re.sub(r'[^a-zA-Z0-9_]', '', metadict['title'])
     postprocessor = Postprocessor(out_filename)
-    
-    with open(file, 'r', encoding='utf-8') as input_file:
+
+    with open(file, encoding='utf-8') as input_file:
         raw_text = input_file.read()
         try:
             token_stream = tokenizer.analyze(raw_text)
         except IllegalCharacter as e:
             logger.error("Illegal character encountered: \"{0}\" at {1}. More: {2}"
-                              .format(raw_text[e.value], e.value,
-                                     (raw_text[e.value:e.value+20] + "...").replace('\n', '\\n')))
+                         .format(raw_text[e.value], e.value,
+                                 (raw_text[e.value:e.value + 20] + "...").replace('\n', '\\n')))
     with open(out_filename, 'w', encoding='utf-8') as output_file:
         parser.parse(token_stream, output_file)
     postprocessor.process()
-     
+
     # Begin the bot parsing
     try:
         os.mkdir('botfiles')
@@ -169,4 +174,3 @@ for file in files:
     bot.prepare()
     logger.info('-----')
     summary_logger.info('\n')
-         

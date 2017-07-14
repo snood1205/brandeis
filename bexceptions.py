@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'''
+"""
 These are the exceptions used by brandeis:
 
     ValidatorError
@@ -33,97 +33,135 @@ These are the exceptions used by brandeis:
      +-- EntityError
     BotError
      +-- MissingFootnote
-'''
+"""
+
 
 class ValidatorError(Exception):
-    '''Base exception class for all file validation errors.'''
+    """Base exception class for all file validation errors."""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
-    
+
+
 class APIError(Exception):
-    '''Base exception class for any Wikisource API errors.'''
+    """Base exception class for any Wikisource API errors."""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
-    
+
+
 class TokenizerError(Exception):
-    '''Base exception class for any tokenizer errors.'''
+    """Base exception class for any tokenizer errors."""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
-    
+
+
 class ParserError(Exception):
-    '''Base exception class for any parser errors.'''
+    """Base exception class for any parser errors."""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
-    
+
+
 class BotError(Exception):
-    '''Base exception class for any bot errors.'''
+    """Base exception class for any bot errors."""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class BadTitle(ValidatorError):
-    '''The file contained an improperly formatted title, or was missing one entirely.'''
+    """The file contained an improperly formatted title, or was missing one entirely."""
+
     def __init__(self, value):
         self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class GroupedCase(ValidatorError):
-    '''The file consists of a group of cases.'''
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class NoCaseInList(APIError):
-    '''This case was not listed in the U.S. Reports
-    (https://en.wikisource.org/wiki/United_States_Reports).'''
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class PageNotFound(APIError):
-    '''The API call did not find an existing page.'''
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class MultipleCases(APIError):
-    '''The case was found multiple times in the list.'''
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class IllegalCharacter(TokenizerError):
-    '''The tokenizer encountered an illegal character.'''
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class EntityError(ParserError):
-    '''The parser encountered an unrecognized HTML entity.'''
-    def __init__(self, value):
-        self.value = value
+
     def __str__(self):
         return repr(self.value)
 
-class MissingFootnote(BotError):
-    '''A footnote is missing.'''
+
+class GroupedCase(ValidatorError):
+    """The file consists of a group of cases."""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
-    
+
+
+class NoCaseInList(APIError):
+    """This case was not listed in the U.S. Reports
+    (https://en.wikisource.org/wiki/United_States_Reports)."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class PageNotFound(APIError):
+    """The API call did not find an existing page."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class MultipleCases(APIError):
+    """The case was found multiple times in the list."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class IllegalCharacter(TokenizerError):
+    """The tokenizer encountered an illegal character."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class EntityError(ParserError):
+    """The parser encountered an unrecognized HTML entity."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class MissingFootnote(BotError):
+    """A footnote is missing."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)

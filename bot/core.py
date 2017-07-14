@@ -20,15 +20,20 @@
 from bot.botparser import BotParser
 from bot.scan import *
 
+
 class Bot(object):
+    """
+
+    """
+
     def __init__(self, inputfile, output, metadict):
         self.inputfile = inputfile
         self.output = output
         self.metadict = metadict
         self.parser = BotParser(self.inputfile, self.output, self.metadict)
-        
+
     def prepare(self):
-        '''Prepare file so the bot can upload it.'''
+        """Prepare file so the bot can upload it."""
         self.parser.prepare()
         if 'pdf' in self.metadict:
             self.metadict['pdf_filename'] = get_scan(self.inputfile, self.metadict['pdf'])

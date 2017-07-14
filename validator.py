@@ -20,56 +20,60 @@
 import re
 from bexceptions import BadTitle, GroupedCase
 
+
 class Validator(object):
-    
+    """
+
+    """
+
     def __init__(self, filename):
         self.filename = filename
-        self.file = open(filename, 'r', encoding='utf-8')
+        self.file = open(filename, encoding='utf-8')
         self.e = None
-        
+
     def __del__(self):
         self.file.close()
-    
+
     def validate(self):
-        '''Run various validation functions to try to weed out any improperly-formatted
-        files.'''
+        """Run various validation functions to try to weed out any improperly-formatted
+        files."""
         try:
-            self.validateTitlePlacement()
-            self.validateTitleParts()
+            self.validate_title_placement()
+            self.validate_title_parts()
         except Exception as e:
             raise e
-    
-    def validateTitlePlacement(self):
-        '''Check a file to make sure it has a properly-formatted title. The title should be in the
-        first line of the HTML file that isn't whitespace.'''
+
+    def validate_title_placement(self):
+        """Check a file to make sure it has a properly-formatted title. The title should be in the
+        first line of the HTML file that isn't whitespace."""
         while True:
             first_line = self.file.readline()
             match = re.match(r'^[\n\s\t\r]+$', first_line, re.MULTILINE)
             if not match:
                 break
-        self.file.seek(0, 0) # Reset position in file
-        title = re.match(r'[\s\t]*<h1>(.*?)<\/h1>', first_line)
+        self.file.seek(0, 0)  # Reset position in file
+        title = re.match(r'[\s\t]*<h1>(.*?)</h1>', first_line)
         if not title:
             raise BadTitle("Poorly placed title in {}.".format(self.filename))
-        
-    def validateTitleParts(self):
-        '''Check that the title can be broken into valid parts. Each title has the short title, 
+
+    def validate_title_parts(self):
+        """Check that the title can be broken into valid parts. Each title has the short title,
         case number, and date. The title can be of any format. The case number is of the format:
         ### U.S. ###
         with 1-3 digits in each number. The date is of the format:
         (####)
         The full format of the title is:
         Title - Number Date
-        '''
+        """
         while True:
             first_line = self.file.readline()
             match = re.match(r'^[\n\s\t\r]+$', first_line, re.MULTILINE)
             if not match:
                 break
-        self.file.seek(0, 0) # Reset position in file
-        match = re.match(r'[\s\t]*<h1>(?P<title>.*?)<\/h1>', first_line)
+        self.file.seek(0, 0)  # Reset position in file
+        match = re.match(r'[\s\t]*<h1>(?P<title>.*?)</h1>', first_line)
         title = match.group('title')
-        parts = re.match(r'(?P<full>(?P<title>.*?)\s\-\s(?P<number>.*?)\s\((?P<date>\d{4})\))',
+        parts = re.match(r'(?P<full>(?P<title>.*?)\s-\s(?P<number>.*?)\s\((?P<date>\d{4})\))',
                          title)
         if not parts:
             raise BadTitle("Title in {0} does not consist of the regular parts: {1}."

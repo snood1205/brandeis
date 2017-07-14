@@ -20,7 +20,14 @@
 import os
 from urllib.request import urlretrieve
 
+
 def get_scan(inputfile, url):
+    """
+
+    :param inputfile:
+    :param url:
+    :return:
+    """
     filename = 'botfiles/pdfs/' + inputfile.replace('wikitext/', '') + '.pdf'
     if not os.path.isfile(filename):
         urlretrieve(url, filename)
